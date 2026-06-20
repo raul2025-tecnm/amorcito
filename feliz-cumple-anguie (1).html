@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Anguie</title>
+<style>
+  :root{
+    --wood-1:#2b1d14;
+    --wood-2:#3f2a1c;
+    --wood-3:#1a120c;
+    --warm-light: rgba(255,196,120,0.18);
+    --cream:#f6ecd9;
+    --cream-2:#efe2c6;
+    --ink:#3a2a1d;
+    --ink-soft:#6b5644;
+    --gold:#c9a36a;
+    --gold-bright:#e8c178;
+    --wax:#8a2c2c;
+    --wax-dark:#5e1c1c;
+    --ios-blue:#0a84ff;
+    --display: 'Fraunces', 'Georgia', serif;
+    --hand: 'Caveat', cursive;
+    --body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  @font-face{
+    font-family:'Fraunces-fallback';
+    src:local('Georgia');
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:var(--body);
+    background:var(--wood-3);
+  }
+
+  /* ---------- SCENE (la mesa de madera) ---------- */
+  .scene{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse 140% 90% at 50% 0%, var(--warm-light), transparent 60%),
+      linear-gradient(180deg, var(--wood-3) 0%, var(--wood-2) 45%, var(--wood-1) 100%);
+  }
+
+  /* wood grain texture */
+  .wood-grain{
+    position:absolute;
+    inset:0;
+    opacity:0.5;
+    mix-blend-mode:overlay;
+    background-image:
+      repeating-linear-gradient(95deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px),
+      repeating-linear-gradient(92deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 2px, transparent 2px, transparent 14px),
+      repeating-linear-gradient(98deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 22px);
+    pointer-events:none;
+  }
+
+  .vignette{
+    position:absolute;
+    inset:0;
+    background:radial-gradient(ellipse 80% 70% at 50% 45%, transparent 40%, rgba(0,0,0,0.55) 100%);
+    pointer-events:none;
+  }
+
+  /* soft ambient floating particles (dust in light) */
+  .dust{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .dust span{
+    position:absolute;
+    width:3px;
+    height:3px;
+    border-radius:50%;
+    background:rgba(255,214,150,0.45);
+    animation:drift 14s linear infinite;
+    opacity:0;
+  }
+  @keyframes drift{
+    0%{transform:translateY(0) translateX(0); opacity:0;}
+    10%{opacity:0.6;}
+    90%{opacity:0.3;}
+    100%{transform:translateY(-220px) translateX(30px); opacity:0;}
+  }
+
+  /* ---------- PHONE ---------- */
+  .phone-wrap{
+    position:relative;
+    z-index:5;
+    perspective:1200px;
+  }
+
+  .phone{
+    position:relative;
+    width:300px;
+    height:610px;
+    border-radius:54px;
+    background:linear-gradient(155deg, #3a3a3e, #1c1c1e 40%, #0c0c0d 100%);
+    box-shadow:
+      0 2px 0 rgba(255,255,255,0.15) inset,
+      0 0 0 2px rgba(0,0,0,0.6),
+      0 30px 60px rgba(0,0,0,0.65),
+      0 10px 20px rgba(0,0,0,0.5),
+      0 0 90px rgba(255,180,90,0.07);
+    padding:5px;
+    transform: rotateX(4deg);
+    animation: settle 1.4s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  @keyframes settle{
+    0%{ transform: rotateX(4deg) translateY(-18px) scale(0.97); filter:brightness(1.3); opacity:0;}
+    100%{ transform: rotateX(4deg) translateY(0) scale(1); filter:brightness(1); opacity:1;}
+  }
+
+  .phone-buttons span{
+    position:absolute;
+    background:linear-gradient(90deg, #18181a, #2c2c2e);
+    border-radius:3px;
+  }
+  .btn-mute{ left:-3px; top:118px; width:3px; height:26px;}
+  .btn-vol-up{ left:-3px; top:165px; width:3px; height:46px;}
+  .btn-vol-down{ left:-3px; top:222px; width:3px; height:46px;}
+  .btn-power{ right:-3px; top:175px; width:3px; height:64px;}
+
+  .screen{
+    position:relative;
+    width:100%;
+    height:100%;
+    border-radius:46px;
+    overflow:hidden;
+    background:#000;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset;
+  }
+
+  /* ============================================================
+     FONDO DE PANTALLA DEL TELÉFONO (lockscreen)
+     ------------------------------------------------------------
+     Usa wallpaper.png como imagen de fondo del iPhone. Debe estar
+     en la misma carpeta que este archivo HTML. Si quieres cambiar
+     la foto, solo reemplaza el archivo o ajusta el nombre aquí abajo.
+     ============================================================ */
+  .lockscreen-bg{
+    position:absolute;
+    inset:0;
+    background-image:
+      linear-gradient(180deg, rgba(10,8,14,0.45) 0%, rgba(10,8,14,0.15) 30%, rgba(10,8,14,0.1) 60%, rgba(8,6,12,0.6) 100%),
+      url('wallpaper.png');
+    background-size: cover;
+    background-position: center 30%;
+    background-repeat: no-repeat;
+    overflow:hidden;
+  }
+
+  .dynamic-island{
+    position:absolute;
+    top:14px;
+    left:50%;
+    transform:translateX(-50%);
+    width:96px;
+    height:28px;
+    background:#000;
+    border-radius:20px;
+    z-index:100;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    transition: width 0.55s cubic-bezier(.23,1.1,.32,1), height 0.55s cubic-bezier(.23,1.1,.32,1), border-radius 0.5s ease, top 0.5s ease;
+  }
+
+  .dynamic-island.music{
+    width:248px;
+    height:38px;
+    border-radius:22px;
+    top:12px;
+  }
+
+  /* tiny camera dot sitting inside the compact island, like the real sensor cluster */
+  .island-camera{
+    position:absolute;
+    right:7px;
+    top:50%;
+    transform:translateY(-50%);
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #3a4a6b, #0b0d14 70%);
+    box-shadow:0 0 0 1px rgba(255,255,255,0.04);
+    opacity:1;
+    transition:opacity 0.3s ease;
+  }
+  .dynamic-island.music .island-camera{ opacity:0; }
+
+  .island-music{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    width:100%;
+    padding:0 11px;
+    opacity:0;
+    transform:scale(0.9);
+    transition: opacity 0.35s ease 0.18s, transform 0.35s ease 0.18s;
+    white-space:nowrap;
+  }
+  .dynamic-island.music .island-music{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  .island-art{
+    width:24px;
+    height:24px;
+    border-radius:6px;
+    flex-shrink:0;
+    background-image: url('https://cdn-images.dzcdn.net/images/cover/2d140d4769830a1f55e8c6d9b856b73b/1900x1900-000000-80-0-0.jpg');
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 0 0 0.5px rgba(255,255,255,0.15) inset;
+  }
+
+  .island-eq{
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    height:13px;
+    flex-shrink:0;
+  }
+  .island-eq span{
+    width:2.5px;
+    background:#1ed760;
+    border-radius:2px;
+    animation: eqBounce 0.9s ease-in-out infinite;
+  }
+  .island-eq span:nth-child(1){ height:40%; animation-delay:0s; }
+  .island-eq span:nth-child(2){ height:100%; animation-delay:0.15s; }
+  .island-eq span:nth-child(3){ height:65%; animation-delay:0.3s; }
+  .island-eq span:nth-child(4){ height:85%; animation-delay:0.45s; }
+  @keyframes eqBounce{
+    0%, 100%{ transform:scaleY(0.4); }
+    50%{ transform:scaleY(1); }
+  }
+
+  /* icono de AirPods conectados, como muestra iOS junto al audio activo */
+  .island-airpods{
+    flex-shrink:0;
+    width:13px;
+    height:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0.92;
+  }
+  .island-airpods svg{ display:block; width:100%; height:100%; }
+
+  .island-text{
+    flex:1;
+    min-width:0;
+    overflow:hidden;
+    line-height:1.15;
+  }
+  .island-text .song{
+    color:#fff;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.1px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .island-text .artist{
+    color:rgba(255,255,255,0.55);
+    font-size:8.5px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .status-bar{
+    position:absolute;
+    top:16px;
+    left:0;
+    right:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 28px;
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    z-index:40;
+    font-family: var(--body);
+    letter-spacing:0.3px;
+  }
+  .status-icons{display:flex; align-items:center; gap:5px;}
+  .status-icons svg{display:block;}
+
+  .lock-time{
+    position:absolute;
+    top:60px;
+    left:0;
+    right:0;
+    text-align:center;
+    color:#fff;
+    z-index:20;
+  }
+  .lock-time .time{
+    font-family: var(--body);
+    font-size:62px;
+    font-weight:600;
+    letter-spacing:-1px;
+    line-height:1;
+    text-shadow:0 2px 18px rgba(0,0,0,0.4);
+  }
+  .lock-time .date{
+    margin-top:6px;
+    font-size:15px;
+    font-weight:500;
+    opacity:0.92;
+    text-shadow:0 1px 10px rgba(0,0,0,0.4);
+  }
+
+  /* ---------- NOTIFICATION ---------- */
+  .notif-wrap{
+    position:absolute;
+    left:10px;
+    right:10px;
+    top:175px;
+    z-index:30;
+    opacity:0;
+    transform:translateY(-30px) scale(0.92);
+  }
+  .notif-wrap.show{
+    animation: notifIn 0.7s cubic-bezier(.22,1.4,.4,1) forwards;
+  }
+  .notif-wrap.pulse{
+    animation: notifIn 0.7s cubic-bezier(.22,1.4,.4,1) forwards, notifPulse 2.6s ease-in-out 1s infinite;
+  }
+  @keyframes notifIn{
+    0%{opacity:0; transform:translateY(-30px) scale(0.9);}
+    60%{opacity:1; transform:translateY(4px) scale(1.02);}
+    100%{opacity:1; transform:translateY(0) scale(1);}
+  }
+  @keyframes notifPulse{
+    0%, 100%{ box-shadow: 0 14px 30px rgba(0,0,0,0.35), 0 0 0 0 rgba(232,90,90,0); }
+    50%{ box-shadow: 0 14px 30px rgba(0,0,0,0.35), 0 0 0 8px rgba(232,90,90,0.08); }
+  }
+
+  .notif{
+    display:flex;
+    gap:11px;
+    align-items:flex-start;
+    background:rgba(60,55,70,0.55);
+    backdrop-filter: blur(26px) saturate(160%);
+    -webkit-backdrop-filter: blur(26px) saturate(160%);
+    border-radius:20px;
+    padding:12px 14px;
+    border:1px solid rgba(255,255,255,0.12);
+    cursor:pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .notif:active{
+    transform:scale(0.97);
+    background:rgba(60,55,70,0.7);
+  }
+
+  .notif-icon{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    flex-shrink:0;
+    background:linear-gradient(145deg, #ff6b6b, #c0392b);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.3);
+  }
+  .notif-icon svg{ width:21px; height:21px; }
+
+  .notif-body{
+    flex:1;
+    min-width:0;
+  }
+  .notif-top-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:1px;
+  }
+  .notif-app{
+    color:rgba(255,255,255,0.95);
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.2px;
+  }
+  .notif-time{
+    color:rgba(255,255,255,0.55);
+    font-size:12px;
+  }
+  .notif-title{
+    color:#fff;
+    font-size:14.5px;
+    font-weight:700;
+    margin:1px 0 2px;
+    line-height:1.25;
+  }
+  .notif-text{
+    color:rgba(255,255,255,0.85);
+    font-size:13.5px;
+    line-height:1.3;
+  }
+
+  .swipe-hint{
+    position:absolute;
+    left:0; right:0;
+    bottom:40px;
+    text-align:center;
+    color:rgba(255,255,255,0.75);
+    font-size:13px;
+    z-index:25;
+    letter-spacing:0.2px;
+    opacity:0;
+    animation: hintIn 0.6s ease forwards 1.4s;
+  }
+  @keyframes hintIn{ to{opacity:1;} }
+
+  /* ---------- MESSAGE APP VIEW ---------- */
+  /* ---------- PASSCODE (pantalla de PIN tipo iOS) ---------- */
+  .passcode-view{
+    position:absolute;
+    inset:0;
+    z-index:70;
+    background:
+      radial-gradient(140% 90% at 50% 0%, rgba(60,45,75,0.55), transparent 55%),
+      linear-gradient(180deg, #14101c 0%, #0a0712 100%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    transform:translateY(100%);
+    transition: transform 0.5s cubic-bezier(.22,1,.36,1);
+  }
+  .passcode-view.open{
+    transform:translateY(0);
+  }
+
+  .passcode-title{
+    margin-top:78px;
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    letter-spacing:0.2px;
+  }
+  .passcode-sub{
+    margin-top:6px;
+    color:rgba(255,255,255,0.45);
+    font-size:12.5px;
+    min-height:16px;
+    transition: color 0.2s ease;
+  }
+  .passcode-sub.error{
+    color:#ff6b6b;
+  }
+
+  .passcode-dots{
+    display:flex;
+    gap:18px;
+    margin:22px 0 30px;
+  }
+  .passcode-dots span{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    border:1.4px solid rgba(255,255,255,0.6);
+    background:transparent;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .passcode-dots span.filled{
+    background:#fff;
+    transform:scale(1.05);
+  }
+  .passcode-dots.shake{
+    animation: shakeDots 0.45s ease;
+  }
+  @keyframes shakeDots{
+    0%, 100%{ transform:translateX(0); }
+    20%{ transform:translateX(-9px); }
+    40%{ transform:translateX(8px); }
+    60%{ transform:translateX(-6px); }
+    80%{ transform:translateX(4px); }
+  }
+
+  .passcode-pad{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px 20px;
+    padding:0 32px;
+  }
+  .passcode-key{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.10);
+    border:none;
+    color:#fff;
+    font-size:22px;
+    font-weight:400;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition: background 0.12s ease, transform 0.1s ease;
+  }
+  .passcode-key:active{
+    background:rgba(255,255,255,0.28);
+    transform:scale(0.94);
+  }
+  .passcode-key.ghost{
+    background:transparent;
+    cursor:default;
+  }
+  .passcode-key.ghost:active{
+    background:transparent;
+    transform:none;
+  }
+  .passcode-key .key-letters{
+    display:block;
+    font-size:7px;
+    letter-spacing:1.5px;
+    font-weight:600;
+    margin-top:1px;
+    opacity:0.7;
+  }
+  .passcode-key-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .passcode-cancel{
+    margin-top:24px;
+    background:none;
+    border:none;
+    color:#8fa8ff;
+    font-size:15px;
+    cursor:pointer;
+  }
+
+  .app-view{
+    position:absolute;
+    inset:0;
+    background:#000;
+    z-index:60;
+    transform:translateY(100%);
+    transition: transform 0.55s cubic-bezier(.22,1,.36,1);
+  }
+  .app-view.open{
+    transform:translateY(0);
+  }
+
+  .app-bg{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, #1c1530 0%, #0f0c1c 100%);
+  }
+
+  .app-header{
+    position:relative;
+    z-index:5;
+    padding:54px 16px 12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .app-header .avatar{
+    width:34px;height:34px;
+    border-radius:50%;
+    background-image: url('raulito-avatar.png');
+    background-size: cover;
+    background-position: center 25%;
+    box-shadow:0 2px 6px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,255,255,0.15) inset;
+  }
+  .app-header .who{
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+  }
+  .app-header .sub{
+    color:rgba(255,255,255,0.5);
+    font-size:12px;
+    margin-top:1px;
+  }
+
+  .chat-area{
+    position:relative;
+    z-index:5;
+    padding:22px 16px 16px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .bubble{
+    background:#2c2c30;
+    color:#fff;
+    padding:10px 14px;
+    border-radius:18px 18px 18px 4px;
+    font-size:14.5px;
+    line-height:1.4;
+    max-width:80%;
+    opacity:0;
+    transform:translateY(8px);
+    animation: bubbleIn 0.5s ease forwards 0.3s;
+  }
+  @keyframes bubbleIn{ to{opacity:1; transform:translateY(0);} }
+
+  .letter-attachment{
+    margin-top:14px;
+    width:78%;
+    max-width:230px;
+    background:linear-gradient(160deg, var(--cream), var(--cream-2));
+    border-radius:10px;
+    padding:16px 14px;
+    box-shadow:0 8px 22px rgba(0,0,0,0.4);
+    cursor:pointer;
+    opacity:0;
+    transform:translateY(10px) scale(0.96);
+    animation: bubbleIn2 0.55s cubic-bezier(.22,1.2,.4,1) forwards 0.85s;
+    position:relative;
+    transition: transform 0.18s ease;
+  }
+  .letter-attachment:active{ transform:scale(0.96); }
+  @keyframes bubbleIn2{ to{opacity:1; transform:translateY(0) scale(1);} }
+
+  .letter-attachment .seal-mini{
+    width:30px;height:30px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 30%, #b14444, var(--wax-dark) 75%);
+    margin:0 auto 8px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 5px rgba(0,0,0,0.35) inset, 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .letter-attachment .seal-mini svg{ width:14px; height:14px; }
+
+  .letter-attachment .label{
+    text-align:center;
+    color:var(--ink);
+    font-family: var(--display), serif;
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:0.3px;
+  }
+  .letter-attachment .label-sub{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:11px;
+    margin-top:3px;
+    letter-spacing:0.5px;
+  }
+
+  /* ---------- LETTER VIEW (full screen) ---------- */
+  .letter-view{
+    position:absolute;
+    inset:0;
+    z-index:80;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(255,210,150,0.12), transparent 55%),
+      linear-gradient(180deg, #1a1120 0%, #0d0814 100%);
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.45s ease;
+    overflow:hidden;
+  }
+  .letter-view.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .letter-close{
+    position:absolute;
+    top:50px;
+    right:18px;
+    z-index:95;
+    width:30px;height:30px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    border:none;
+    color:#fff;
+    font-size:15px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+
+  .letter-scroll{
+    position:absolute;
+    inset:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:88px 20px 50px;
+    scrollbar-width:none;
+  }
+  .letter-scroll::-webkit-scrollbar{ display:none; }
+
+  .paper{
+    position:relative;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 31px, rgba(160,130,90,0.13) 31px 32px),
+      radial-gradient(120% 60% at 15% 0%, rgba(255,255,255,0.5), transparent 55%),
+      linear-gradient(160deg, var(--cream) 0%, var(--cream-2) 100%);
+    border-radius:4px;
+    padding:34px 22px 30px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 25px 50px rgba(0,0,0,0.45);
+    transform: rotate(-0.6deg) scale(0.96);
+    opacity:0;
+    animation: paperIn 0.8s cubic-bezier(.22,1,.36,1) forwards 0.15s;
+  }
+  @keyframes paperIn{
+    to{ opacity:1; transform: rotate(-0.6deg) scale(1); }
+  }
+
+  .paper::before{
+    /* torn/deckled edge effect top */
+    content:'';
+    position:absolute;
+    top:-4px; left:0; right:0; height:8px;
+    background:inherit;
+    border-radius:50%/6px;
+    opacity:0.6;
+  }
+
+  .paper-seal{
+    width:46px;height:46px;
+    border-radius:50%;
+    margin:0 auto 18px;
+    background:radial-gradient(circle at 32% 28%, #c25a5a, var(--wax-dark) 78%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:
+      0 3px 6px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(0,0,0,0.35),
+      inset 0 -2px 3px rgba(255,255,255,0.08);
+  }
+  .paper-seal svg{ width:21px; height:21px; }
+
+  .letter-greeting{
+    font-family: var(--display), serif;
+    color:var(--ink);
+    font-size:26px;
+    font-weight:600;
+    text-align:center;
+    margin:0 0 4px;
+    letter-spacing:0.3px;
+  }
+  .letter-greeting .heart-accent{
+    display:inline-block;
+    color:var(--wax);
+    margin:0 4px;
+  }
+
+  .letter-rule{
+    width:50px;
+    height:2px;
+    background:var(--gold);
+    opacity:0.5;
+    margin:10px auto 22px;
+    border-radius:2px;
+  }
+
+  .letter-body{
+    font-family: var(--hand), cursive;
+    color:var(--ink);
+    font-size:23px;
+    line-height:1.65;
+    text-align:left;
+  }
+  .letter-body .line{
+    opacity:0;
+    transform:translateY(6px);
+    display:block;
+  }
+  .letter-body .line.in{
+    animation: lineIn 0.55s ease forwards;
+  }
+  @keyframes lineIn{ to{opacity:1; transform:translateY(0);} }
+
+  .letter-signoff{
+    margin-top:26px;
+    text-align:right;
+    font-family: var(--hand), cursive;
+    font-size:25px;
+    color:var(--ink);
+    opacity:0;
+  }
+  .letter-signoff.in{
+    animation: lineIn 0.6s ease forwards;
+  }
+
+  .letter-footer-hearts{
+    margin-top:20px;
+    text-align:center;
+    color:var(--wax);
+    font-size:15px;
+    letter-spacing:6px;
+    opacity:0.7;
+  }
+
+  /* floating hearts confetti when letter opens */
+  .hearts-fall{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:90;
+    overflow:hidden;
+  }
+  .hearts-fall span{
+    position:absolute;
+    top:-30px;
+    font-size:14px;
+    color:var(--gold-bright);
+    opacity:0.85;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform:translateY(680px) rotate(380deg); opacity:0; }
+  }
+
+  /* small viewport adjustments */
+  @media (max-width:380px){
+    .phone{ width:84vw; max-width:300px; height:auto; aspect-ratio: 300/610; }
+  }
+
+  .credit{
+    position:absolute;
+    bottom:14px;
+    left:0; right:0;
+    text-align:center;
+    color:rgba(255,255,255,0.25);
+    font-size:11px;
+    letter-spacing:0.5px;
+    z-index:3;
+    font-family: var(--body);
+  }
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="wood-grain"></div>
+  <div class="vignette"></div>
+  <div class="dust" id="dust"></div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-buttons">
+        <span class="btn-mute"></span>
+        <span class="btn-vol-up"></span>
+        <span class="btn-vol-down"></span>
+        <span class="btn-power"></span>
+      </div>
+
+      <div class="screen">
+        <!-- LOCKSCREEN -->
+        <div class="lockscreen-bg"></div>
+
+        <div class="dynamic-island" id="dynamicIsland">
+          <span class="island-camera"></span>
+          <div class="island-music">
+            <div class="island-art"></div>
+            <div class="island-text">
+              <div class="song">Oye Mi Amor</div>
+              <div class="artist">Maná</div>
+            </div>
+            <div class="island-airpods">
+              <svg viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.2 1.5C5.6 1.5 3.6 3.7 3.6 6.5c0 1.9 0.9 3.1 1.8 4.2 0.7 0.9 1.3 1.6 1.3 2.7v9.6c0 1.9 1.3 3 2.7 3 1.3 0 2.4-1 2.4-2.6V9.4c0-3.6-1.3-7.9-3.6-7.9z" fill="#f2f2f4"/>
+                <ellipse cx="8.3" cy="6.3" rx="3.1" ry="3.9" fill="#fafafc"/>
+                <path d="M16.4 1.5c2.6 0 4.6 2.2 4.6 5 0 1.9-0.9 3.1-1.8 4.2-0.7 0.9-1.3 1.6-1.3 2.7v9.6c0 1.9-1.3 3-2.7 3-1.3 0-2.4-1-2.4-2.6V9.4c0-3.6 1.3-7.9 3.6-7.9z" fill="#f2f2f4"/>
+                <ellipse cx="16.3" cy="6.3" rx="3.1" ry="3.9" fill="#fafafc"/>
+              </svg>
+            </div>
+            <div class="island-eq">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-bar">
+          <span id="clockTime">9:41</span>
+          <div class="status-icons">
+            <svg width="17" height="11" viewBox="0 0 17 11" fill="none"><rect x="0" y="6" width="2.5" height="5" rx="0.5" fill="white"/><rect x="4" y="4" width="2.5" height="7" rx="0.5" fill="white"/><rect x="8" y="2" width="2.5" height="9" rx="0.5" fill="white"/><rect x="12" y="0" width="2.5" height="11" rx="0.5" fill="white"/></svg>
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 11C3.36 11 0 8.5 0 5.5C0 2.5 3.36 0 7.5 0C11.64 0 15 2.5 15 5.5C15 6.4 14.7 7.2 14.2 8L15 11L11.8 9.9C10.6 10.6 9.1 11 7.5 11Z" fill="white" opacity="0"/><path d="M1 4.5C1 4.5 3 1.5 7.5 1.5C12 1.5 14 4.5 14 4.5M3 6.5C3 6.5 4.7 4.5 7.5 4.5C10.3 4.5 12 6.5 12 6.5M5.3 8.5C5.3 8.5 6.1 7.5 7.5 7.5C8.9 7.5 9.7 8.5 9.7 8.5M7.5 10.3V10.3" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" opacity="0.6"/><rect x="2" y="2" width="15" height="8" rx="1.2" fill="white"/><rect x="22.5" y="4" width="1.5" height="4" rx="0.7" fill="white" opacity="0.6"/></svg>
+          </div>
+        </div>
+
+        <div class="lock-time">
+          <div class="time" id="bigTime">9:41</div>
+          <div class="date" id="bigDate">viernes, 19 de junio</div>
+        </div>
+
+        <div class="notif-wrap" id="notifWrap">
+          <div class="notif" id="notifBtn">
+            <div class="notif-icon">
+              <svg viewBox="0 0 24 24" fill="white"><path d="M12 21s-7.5-4.6-10-9.1C0.3 8.6 1.6 5 5 4c2-0.6 3.7 0.2 5 2 1.3-1.8 3-2.6 5-2 3.4 1 4.7 4.6 3 7.9C19.5 16.4 12 21 12 21z"/></svg>
+            </div>
+            <div class="notif-body">
+              <div class="notif-top-row">
+                <span class="notif-app">Mensajes</span>
+                <span class="notif-time">ahora</span>
+              </div>
+              <div class="notif-title">Raulito 💌</div>
+              <div class="notif-text">Raulito te ha enviado una carta...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="swipe-hint" id="swipeHint">toca la notificación para abrir</div>
+
+        <!-- PASSCODE -->
+        <div class="passcode-view" id="passcodeView">
+          <div class="passcode-title">Ingresa tu código</div>
+          <div class="passcode-sub" id="passcodeSub">&nbsp;</div>
+          <div class="passcode-dots" id="passcodeDots">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div class="passcode-pad">
+            <button class="passcode-key" data-key="1">1</button>
+            <button class="passcode-key" data-key="2"><span class="passcode-key-wrap">2<span class="key-letters">ABC</span></span></button>
+            <button class="passcode-key" data-key="3"><span class="passcode-key-wrap">3<span class="key-letters">DEF</span></span></button>
+            <button class="passcode-key" data-key="4"><span class="passcode-key-wrap">4<span class="key-letters">GHI</span></span></button>
+            <button class="passcode-key" data-key="5"><span class="passcode-key-wrap">5<span class="key-letters">JKL</span></span></button>
+            <button class="passcode-key" data-key="6"><span class="passcode-key-wrap">6<span class="key-letters">MNO</span></span></button>
+            <button class="passcode-key" data-key="7"><span class="passcode-key-wrap">7<span class="key-letters">PQRS</span></span></button>
+            <button class="passcode-key" data-key="8"><span class="passcode-key-wrap">8<span class="key-letters">TUV</span></span></button>
+            <button class="passcode-key" data-key="9"><span class="passcode-key-wrap">9<span class="key-letters">WXYZ</span></span></button>
+            <button class="passcode-key ghost"></button>
+            <button class="passcode-key" data-key="0">0</button>
+            <button class="passcode-key" data-key="del">⌫</button>
+          </div>
+        </div>
+
+        <!-- MESSAGE APP -->
+        <div class="app-view" id="appView">
+          <div class="app-bg"></div>
+          <div class="app-header">
+            <div class="avatar"></div>
+            <div>
+              <div class="who">Raulito</div>
+              <div class="sub">ahora</div>
+            </div>
+          </div>
+          <div class="chat-area">
+            <div class="bubble">Para ti, Anguie 🤍</div>
+            <div class="letter-attachment" id="letterAttachment">
+              <div class="seal-mini">
+                <svg viewBox="0 0 24 24" fill="#f3d9b1"><path d="M12 21s-7.5-4.6-10-9.1C0.3 8.6 1.6 5 5 4c2-0.6 3.7 0.2 5 2 1.3-1.8 3-2.6 5-2 3.4 1 4.7 4.6 3 7.9C19.5 16.4 12 21 12 21z"/></svg>
+              </div>
+              <div class="label">Una carta para ti</div>
+              <div class="label-sub">TOCA PARA ABRIR</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LETTER FULL VIEW -->
+        <div class="letter-view" id="letterView">
+          <button class="letter-close" id="letterClose">✕</button>
+          <div class="hearts-fall" id="heartsFall"></div>
+          <div class="letter-scroll">
+            <div class="paper">
+              <div class="paper-seal">
+                <svg viewBox="0 0 24 24" fill="#f3d9b1"><path d="M12 21s-7.5-4.6-10-9.1C0.3 8.6 1.6 5 5 4c2-0.6 3.7 0.2 5 2 1.3-1.8 3-2.6 5-2 3.4 1 4.7 4.6 3 7.9C19.5 16.4 12 21 12 21z"/></svg>
+              </div>
+              <h1 class="letter-greeting">Feliz cumple<span class="heart-accent">♡</span>Anguie</h1>
+              <div class="letter-rule"></div>
+              <div class="letter-body" id="letterBody">
+                <span class="line">Mi niña preciosa, gracias por estar siempre conmigo,</span>
+                <span class="line">cada día contigo es un regalo que ilumina mi vida,</span>
+                <span class="line">te deseo lo mejor hoy y siempre,</span>
+                <span class="line">deseo que todos tus sueños se cumplan,</span>
+                <span class="line">y que nunca te falte amor ni alegría.</span>
+              </div>
+              <div class="letter-signoff" id="letterSign">— Raulito</div>
+              <div class="letter-footer-hearts">♡ ♡ ♡</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="credit">desliza, toca, y feliz cumpleaños</div>
+
+  <!-- ============================================================
+       AUDIO DE LA CANCIÓN (Oye Mi Amor - Maná)
+       ------------------------------------------------------------
+       1) Pon el archivo de audio (mp3) en la misma carpeta que este
+          HTML y escribe su nombre en "src" abajo. Por ejemplo:
+          <source src="oye-mi-amor.mp3" type="audio/mpeg">
+
+       2) En la variable SONG_START_SECONDS, más abajo en el script,
+          escribe desde qué segundo de la canción quieres que empiece
+          a sonar (por ejemplo 60 para arrancar en el minuto 1:00).
+       ============================================================ -->
+  <audio id="songAudio" preload="auto">
+    <source src="pelos.mp3" type="audio/mpeg">
+  </audio>
+</div>
+
+<script>
+(function(){
+
+  // ============================================================
+  // CONFIGURA AQUÍ desde qué segundo empieza a sonar la canción
+  // Ejemplo: 60 = arranca en el minuto 1:00 de la pista
+  // ============================================================
+  const SONG_START_SECONDS = 112;
+
+  // live clock
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function updateClock(){
+    const now = new Date();
+    const h = now.getHours();
+    const m = pad(now.getMinutes());
+    const h12 = (h % 12) || 12;
+    document.getElementById('clockTime').textContent = h12 + ':' + m;
+    document.getElementById('bigTime').textContent = h12 + ':' + m;
+    const days = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    document.getElementById('bigDate').textContent = days[now.getDay()] + ', ' + now.getDate() + ' de ' + months[now.getMonth()];
+  }
+  updateClock();
+  setInterval(updateClock, 15000);
+
+  // ---------- Sonido de notificación (sintetizado, sin archivos externos) ----------
+  let audioCtx = null;
+  function getAudioCtx(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playNotificationSound(){
+    try{
+      const ctx = getAudioCtx();
+      const now = ctx.currentTime;
+      // dos tonos cortos ascendentes, como el "ding-dong" clásico de iOS
+      const tones = [
+        { freq: 1318.5, start: 0,    dur: 0.16 }, // E6
+        { freq: 1760.0, start: 0.13, dur: 0.22 }  // A6
+      ];
+      tones.forEach(t=>{
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = t.freq;
+        gain.gain.setValueAtTime(0, now + t.start);
+        gain.gain.linearRampToValueAtTime(0.22, now + t.start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + t.start + t.dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + t.start);
+        osc.stop(now + t.start + t.dur + 0.02);
+      });
+    }catch(e){ /* el navegador no soporta Web Audio, seguimos sin sonido */ }
+  }
+
+  // ambient dust
+  const dustEl = document.getElementById('dust');
+  for(let i=0;i<18;i++){
+    const d = document.createElement('span');
+    d.style.left = (10+Math.random()*80)+'%';
+    d.style.bottom = (Math.random()*30)+'%';
+    d.style.animationDelay = (Math.random()*14)+'s';
+    d.style.animationDuration = (10+Math.random()*10)+'s';
+    dustEl.appendChild(d);
+  }
+
+  const island = document.getElementById('dynamicIsland');
+  const notifWrap = document.getElementById('notifWrap');
+  const songAudio = document.getElementById('songAudio');
+
+  // ---------- Control de la canción real (archivo de audio) ----------
+  // Arranca desde SONG_START_SECONDS y se detiene en cuanto se toca
+  // la notificación, justo cuando la portada deja de mostrarse.
+  function playSong(){
+    try{
+      songAudio.currentTime = SONG_START_SECONDS;
+      const playPromise = songAudio.play();
+      if(playPromise && playPromise.catch){
+        playPromise.catch(()=>{ /* el navegador bloqueó el autoplay; sonará igual al primer toque */ });
+      }
+    }catch(e){ /* si no hay archivo de audio cargado, seguimos sin sonido */ }
+  }
+  function stopSong(){
+    try{
+      songAudio.pause();
+    }catch(e){}
+  }
+  // si el navegador bloqueó el autoplay, reintenta en el primer toque del usuario
+  document.addEventListener('click', function retrySong(){
+    if(songAudio.paused && island.classList.contains('music')) playSong();
+  }, { once:true });
+
+  // ---------- Secuencia principal: arranca sola al cargar la página ----------
+  // Nota: algunos navegadores silencian el primer sonido si no hubo antes
+  // ningún toque del usuario; en cuanto la persona toca la pantalla
+  // (por ejemplo al abrir la notificación), el audio queda desbloqueado
+  // para el resto de la experiencia.
+  function startSequence(){
+    // 1) la música empieza a sonar en la Dynamic Island (con AirPods conectados)
+    setTimeout(()=>{
+      island.classList.add('music');
+      playSong();
+    }, 400);
+
+    // 2) llega la notificación: la isla se reduce un instante, suena el aviso, y aparece el mensaje
+    setTimeout(()=>{
+      island.classList.remove('music');
+      playNotificationSound();
+      notifWrap.classList.add('show');
+      setTimeout(()=> island.classList.add('music'), 750);
+      setTimeout(()=> notifWrap.classList.add('pulse'), 700);
+    }, 1900);
+  }
+  startSequence();
+
+  // desbloquea el audio en el primer toque del usuario, por si el navegador
+  // silenció el sonido inicial de la notificación
+  document.addEventListener('click', getAudioCtx, { once:true });
+  document.addEventListener('touchstart', getAudioCtx, { once:true });
+
+  // open passcode, then message app
+  const notifBtn = document.getElementById('notifBtn');
+  const appView = document.getElementById('appView');
+  const swipeHint = document.getElementById('swipeHint');
+  const passcodeView = document.getElementById('passcodeView');
+  const passcodeDots = document.getElementById('passcodeDots');
+  const passcodeSub = document.getElementById('passcodeSub');
+  const dots = passcodeDots.querySelectorAll('span');
+
+  const CORRECT_PIN = '2008';
+  let enteredPin = '';
+  let pinLocked = false; // evita doble envío mientras se valida
+
+  function updateDots(){
+    dots.forEach((d, i)=>{
+      d.classList.toggle('filled', i < enteredPin.length);
+    });
+  }
+
+  function resetPin(){
+    enteredPin = '';
+    updateDots();
+  }
+
+  function wrongPin(){
+    pinLocked = true;
+    passcodeSub.textContent = 'Código incorrecto. Inténtalo de nuevo.';
+    passcodeSub.classList.add('error');
+    passcodeDots.classList.add('shake');
+    setTimeout(()=>{
+      passcodeDots.classList.remove('shake');
+      resetPin();
+      pinLocked = false;
+    }, 480);
+  }
+
+  function correctPin(){
+    pinLocked = true;
+    dots.forEach(d => d.classList.add('filled'));
+    setTimeout(()=>{
+      passcodeView.classList.remove('open');
+      appView.classList.add('open');
+      swipeHint.style.display = 'none';
+      setTimeout(()=>{
+        resetPin();
+        passcodeSub.textContent = '\u00A0';
+        passcodeSub.classList.remove('error');
+        pinLocked = false;
+      }, 500);
+    }, 220);
+  }
+
+  notifBtn.addEventListener('click', ()=>{
+    passcodeView.classList.add('open');
+    // se quita la portada/reproducción al abrir la notificación
+    stopSong();
+    island.classList.remove('music');
+  });
+
+  document.querySelectorAll('.passcode-key[data-key]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(pinLocked) return;
+      const key = btn.getAttribute('data-key');
+
+      if(key === 'del'){
+        enteredPin = enteredPin.slice(0, -1);
+        updateDots();
+        return;
+      }
+
+      if(enteredPin.length >= 4) return;
+      enteredPin += key;
+      updateDots();
+
+      if(enteredPin.length === 4){
+        if(enteredPin === CORRECT_PIN){
+          correctPin();
+        } else {
+          wrongPin();
+        }
+      }
+    });
+  });
+
+  // open letter
+  const letterAttachment = document.getElementById('letterAttachment');
+  const letterView = document.getElementById('letterView');
+  const letterBody = document.getElementById('letterBody');
+  const letterSign = document.getElementById('letterSign');
+  const heartsFall = document.getElementById('heartsFall');
+
+  function spawnHearts(){
+    const symbols = ['♡','❤','♥'];
+    for(let i=0;i<22;i++){
+      const h = document.createElement('span');
+      h.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+      h.style.left = Math.random()*100+'%';
+      h.style.animationDuration = (3.5+Math.random()*3)+'s';
+      h.style.animationDelay = (Math.random()*1.8)+'s';
+      h.style.fontSize = (10+Math.random()*14)+'px';
+      heartsFall.appendChild(h);
+    }
+  }
+
+  let opened = false;
+  letterAttachment.addEventListener('click', ()=>{
+    letterView.classList.add('open');
+    if(!opened){
+      opened = true;
+      spawnHearts();
+      // staggered line reveal
+      const lines = letterBody.querySelectorAll('.line');
+      lines.forEach((line, i)=>{
+        setTimeout(()=> line.classList.add('in'), 600 + i*420);
+      });
+      setTimeout(()=> letterSign.classList.add('in'), 600 + lines.length*420 + 200);
+    }
+  });
+
+  document.getElementById('letterClose').addEventListener('click', ()=>{
+    letterView.classList.remove('open');
+  });
+
+})();
+</script>
+
+</body>
+</html>
